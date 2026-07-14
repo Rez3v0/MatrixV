@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "matrixv-backend"
+version = "0.1.0"
+description = "Backend for MatrixV project"
+authors = ["MatrixV <info@matrixv.com>"]
+readme = "README.md"
+packages = [{include = "*", from="."}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.111.0"
+uvicorn = {extras = ["standard"], version = "^0.30.1"}
+sqlalchemy = "^2.0.31"
+alembic = "^1.13.2"
+psycopg2-binary = "^2.9.9"
+celery = "^5.4.0"
+redis = "^5.0.7"
+pydantic = "^2.8.2"
+pydantic-settings = "^2.3.4"
+boto3 = "^1.34.140"
+playwright = "^1.42.0"
+fake-useragent = "^1.5.1"
+beautifulsoup4 = "^4.12.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
