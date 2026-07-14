@@ -16,6 +16,13 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str = "password123"
     MINIO_SECURE: bool = False
     
+    # LLM 配置
+    OPENAI_API_KEY: str = "dummy-key-for-local"
+    OPENAI_BASE_URL: str = "https://api.deepseek.com/v1"
+    
+    # 外部 API 配置
+    PEXELS_API_KEY: str = "dummy-pexels-key"
+    
     class Config:
         env_file = ".env"
 

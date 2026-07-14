@@ -1,49 +1,60 @@
-import React from 'react';
-import { Card, Row, Col, Statistic, Table } from 'antd';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Card, Statistic, Row, Col, Typography, Button, message } from 'antd';
+import { PlayCircleOutlined } from '@ant-design/icons';
+import axios from 'axios';
+
+const { Title } = Typography;
 
 const Dashboard: React.FC = () => {
-  const dataSource = [
-    { key: '1', name: '抖音项目A', status: 'rendering', time: '10 mins' },
-    { key: '2', name: '小红书项目B', status: 'done', time: '1 hour' },
-  ];
+    const [loading, setLoading] = useState(false);
 
-  const columns = [
-    { title: 'Project Name', dataIndex: 'name', key: 'name' },
-    { title: 'Status', dataIndex: 'status', key: 'status' },
-    { title: 'Time Elapsed', dataIndex: 'time', key: 'time' },
-    { 
-      title: 'Action', 
-      key: 'action', 
-      render: () => <Link to="/tasks">View Tasks</Link> 
-    },
-  ];
+    const handleStartTask = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post('/api/tasks/start');
+            message.success(`任务已启动！任务ID: ${response.data.task_id}`);
+        } catch (error) {
+            message.error('启动任务失败，请检查后端服务。');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <div style={{ padding: '24px' }}>
-      <h1>Dashboard</h1>
-      <Row gutter={16}>
-        <Col span={8}>
-          <Card>
-            <Statistic title="Total Tasks" value={112} />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic title="Running" value={3} />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic title="Failed" value={1} valueStyle={{ color: '#cf1322' }} />
-          </Card>
-        </Col>
-      </Row>
-      
-      <h2 style={{ marginTop: '24px' }}>Recent Projects</h2>
-      <Table dataSource={dataSource} columns={columns} />
-    </div>
-  );
+    return (
+        <div>
+            <Title level={2}>控制台概览</Title>
+            <Row gutter={16} style={{ marginBottom: '24px' }}>
+                <Col span={24}>
+                    <Button 
+                        type="primary" 
+                        size="large"
+                        icon={<PlayCircleOutlined />} 
+                        onClick={handleStartTask}
+                        loading={loading}
+                    >
+                        一键生成爆款视频
+                    </Button>
+                </Col>
+            </Row>
+            <Row gutter={16}>
+                <Col span={8}>
+                    <Card>
+                        <Statistic title="今日生成视频数" value={0} />
+                    </Card>
+                </Col>
+                <Col span={8}>
+                    <Card>
+                        <Statistic title="运行中的节点" value={5} />
+                    </Card>
+                </Col>
+                <Col span={8}>
+                    <Card>
+                        <Statistic title="系统状态" value="Normal" valueStyle={{ color: '#3f8600' }} />
+                    </Card>
+                </Col>
+            </Row>
+        </div>
+    );
 };
 
 export default Dashboard;
