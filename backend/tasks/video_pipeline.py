@@ -23,8 +23,13 @@ def update_task_status(db, task_id: int, status: str):
         db.commit()
         logger.info(f"Task {task_id} status updated to: {status}")
 
-def log_agent_action(db, task_id: int, agent_name: str, action: str, output: str):
-    log = AgentLog(task_id=task_id, agent_name=agent_name, action=action, output_metadata=output)
+def log_agent_action(db, task_id: int, agent_name: str, input_data: dict = None, output_data: dict = None):
+    log = AgentLog(
+        task_id=task_id,
+        agent_name=agent_name,
+        input_data=input_data,
+        output_data=output_data,
+    )
     db.add(log)
     db.commit()
 
@@ -46,7 +51,7 @@ async def async_pipeline(task_id: int):
             # 假装完成，给一个测试用的视频链接
             task = db.query(VideoTask).filter(VideoTask.id == task_id).first()
             task.status = "done"
-            task.output_url = "https://www.w3schools.com/html/mov_bbb.mp4" # 测试用视频
+            task.video_url = "https://www.w3schools.com/html/mov_bbb.mp4" # 测试用视频
             db.commit()
             return
             
@@ -59,7 +64,7 @@ async def async_pipeline(task_id: int):
         if not trends:
             raise Exception("No trends found.")
         best_trend = trends[0]
-        log_agent_action(db, task_id, "TrendCatcher", "Found Best Trend", str(best_trend.get("title")))
+        log_agent_action(db, task_id, "TrendCatcher", input_data=best_trend, output_data={"title": best_trend.get("title")})
 
         # 2. Agent 2: 文案总编
         update_task_status(db, task_id, "writing")
@@ -67,17 +72,17 @@ async def async_pipeline(task_id: int):
         final_script = await script_agent.run(best_trend)
         if not final_script:
             raise Exception("Script generation failed.")
-        log_agent_action(db, task_id, "ScriptEditor", "Generated Script", final_script[:50] + "...")
+        log_agent_action(db, task_id, "ScriptEditor", input_data={"trend": best_trend.get("title")}, output_data={"script": final_script[:50] + "..."})
 
         # 3. Agent 3: 视觉导演 (由于渲染需要较长时间，这里提前)
         visual_agent = VisualDirectorAgent()
         shots = await visual_agent.run(task_id, final_script)
-        log_agent_action(db, task_id, "VisualDirector", "Fetched Shots", f"Count: {len(shots)}")
+        log_agent_action(db, task_id, "VisualDirector", input_data={"script": final_script[:50]}, output_data={"shot_count": len(shots)})
 
         # 4. Agent 4: 声音艺术家
         audio_agent = AudioArtistAgent()
         audio_asset = await audio_agent.run(task_id, final_script)
-        log_agent_action(db, task_id, "AudioArtist", "Generated Audio", str(audio_asset.get("s3_url")))
+        log_agent_action(db, task_id, "AudioArtist", input_data={"script_length": len(final_script)}, output_data={"s3_url": audio_asset.get("s3_url")})
 
         # 5. Agent 5: 剪辑大师
         update_task_status(db, task_id, "rendering")
@@ -85,7 +90,7 @@ async def async_pipeline(task_id: int):
         output_url = await editor_agent.run(task_id, shots, audio_asset)
         
         if output_url:
-            log_agent_action(db, task_id, "VideoEditor", "Rendered Video", output_url)
+            log_agent_action(db, task_id, "VideoEditor", input_data={"shots": len(shots)}, output_data={"video_url": output_url})
             update_task_status(db, task_id, "done")
         else:
             raise Exception("Final rendering failed.")

@@ -9,7 +9,7 @@ interface Task {
     id: number;
     title: string;
     status: string;
-    output_url?: string;
+    video_url?: string;
 }
 
 const TaskList: React.FC = () => {
@@ -73,11 +73,11 @@ const TaskList: React.FC = () => {
             key: 'action',
             render: (_: any, record: Task) => (
                 <Space size="middle">
-                    {record.status === 'done' && record.output_url && (
-                        <Button 
-                            type="link" 
+                    {record.status === 'done' && record.video_url && (
+                        <Button
+                            type="link"
                             icon={<VideoCameraOutlined />}
-                            onClick={() => showVideo(record.output_url!)}
+                            onClick={() => showVideo(record.video_url!)}
                         >
                             查看成片
                         </Button>

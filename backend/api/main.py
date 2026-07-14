@@ -28,24 +28,34 @@ def start_video_task(db: Session = Depends(get_db)):
     """
     创建一个新任务并触发流水线。
     """
+    # TODO: 接入用户认证后，从 token 解析真实 user_id 并关联 project
     new_task = VideoTask(
         title="Auto Generated Task",
         status="pending",
-        user_id=1 
     )
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
-    
+
     # 触发 Celery 任务
     run_video_pipeline.delay(new_task.id)
-    
+
     return {"message": "Task started", "task_id": new_task.id}
+
 
 @app.get("/api/tasks")
 def get_tasks(db: Session = Depends(get_db)):
     tasks = db.query(VideoTask).order_by(VideoTask.created_at.desc()).all()
-    return [{"id": t.id, "title": t.title, "status": t.status, "output_url": t.output_url} for t in tasks]
+    return [
+        {
+            "id": t.id,
+            "title": t.title,
+            "status": t.status,
+            "video_url": t.video_url,
+        }
+        for t in tasks
+    ]
+
 
 @app.get("/")
 def read_root():

@@ -39,7 +39,8 @@ class VideoTask(Base):
     """
     __tablename__ = "video_tasks"
     id = Column(Integer, primary_key=True, index=True, comment="任务自增ID")
-    project_id = Column(Integer, ForeignKey("projects.id"), comment="所属项目ID")
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True, comment="所属项目ID(可空，支持独立任务)")
+    title = Column(String(200), nullable=True, comment="任务标题/视频标题")
     status = Column(String(20), default="pending", comment="当前所处状态机节点")
     source_topic_id = Column(Integer, nullable=True, comment="关联的热点选题ID")
     script_text = Column(Text, nullable=True, comment="Agent 2 生成的最终视频文案")

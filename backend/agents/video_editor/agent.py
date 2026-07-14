@@ -76,7 +76,7 @@ class VideoEditorAgent:
                 task = db.query(VideoTask).filter(VideoTask.id == task_id).first()
                 if task:
                     task.status = "done"
-                    task.output_url = s3_url
+                    task.video_url = s3_url
                     db.commit()
                     logger.info(f"Task {task_id} completed successfully! URL: {s3_url}")
             except Exception as e:
